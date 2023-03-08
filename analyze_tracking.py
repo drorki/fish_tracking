@@ -71,8 +71,6 @@ annotations_path = r'\VIDEO_20230223_133606599_annotation\fish_bottom_right'
 #filename2load = 'tracks_20230228-181308.pkl'  # max_iou_dist = 0.2, max_age = 12, n_init=4, max_cosine_distance = 0.4 --> very few trackers
 #filename2load = 'tracks_20230228-181822.pkl'  # max_iou_dist = 0.8, max_age = 12, n_init=4, max_cosine_distance = 0.4 --> 183/816
 #filename2load = 'tracks_20230228-183435.pkl'  # max_iou_dist = 0.8, max_age = 12, n_init=4, max_cosine_distance = 0.8 --> 184/816
-
-
 #filename2load = 'tracks_20230301-122144.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.4, max_age = 12, max_iou_dist = 0.5, n_init=4, nn_budget=None <-- 241 / 816
 #filename2load = 'tracks_20230301-170515.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.4, max_age = 12, max_iou_dist = 0.5, n_init=3, nn_budget=None <--  282 / 816
 #filename2load = 'tracks_20230301-171343.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.5, n_init=3, nn_budget=None <-- 293 / 816
