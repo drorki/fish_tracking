@@ -12,7 +12,8 @@ number of frames.
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-
+import glob
+import os
 
 def convert(size,x,y,w,h):
     box = np.zeros(4)
@@ -35,11 +36,14 @@ def get_annotated_track(data_path, img_h, img_w):
     are the normalized coordinates of the center of the bounding box. To make coordinates normalized, we take pixel
     values of x and y, which marks the center of the bounding box on the x- and y-axis
     '''
-    n_frames = 816
+    #n_frames = 816
+    annotation_files = glob.glob(os.path.join(data_path, 'frame*.txt'))
+    n_frames = len(annotation_files)
     bbox = []
     xy = []
-    for frame_no in range(n_frames):
-        filename = data_path + r'\frame' + str(frame_no) + '.txt'
+    for frame_no in range(n_frames):  # Iterate over frame_no instead of filename, since we don't know the order of the files in annotation_files
+        #filename = data_path + r'\frame' + str(frame_no) + '.txt'
+        filename = os.path.join(data_path, 'frame' + str(frame_no) + '.txt')
         txt_file = open(filename, "r")
         line = txt_file.read().splitlines()
         values = line[0].split()
@@ -66,32 +70,48 @@ img_h = 1296  # pixels
 img_w = 2304  # pixels
 dist_thd_pixels = 50
 video_path = r'.\data\video'
-annotation_paths = [                                           # List of directories with annotation files
-    r'\VIDEO_20230223_133606599_annotation\fish_bottom_right',
-    r'\VIDEO_20230223_133606599_annotation\fish_first_from_right',
-    r'\VIDEO_20230223_133606599_annotation\fish_first_left',
-    r'\VIDEO_20230223_133606599_annotation\fish_second_from_left',
-    r'\VIDEO_20230223_133606599_annotation\fish_second_from_right',    # 'Original' annotation
-    r'\VIDEO_20230223_133606599_annotation\fish_third_from_right'
-    ]
-###########################################################
+
+video_of_clean_container = True  # Determine which annotation to use: original (=False) of clean container (=True)
+
+if video_of_clean_container:
+    # ---- For new video with a clean container, e.g., VIDEO_20230305_111158706 ------------------------
+    annotation_paths = [                                        # List of directories with annotation files
+        '/VIDEO_20230305_111158706_annotation/fish_bottom_left',
+        '/VIDEO_20230305_111158706_annotation/fish_left_middle',
+        '/VIDEO_20230305_111158706_annotation/fish_left_top',
+        '/VIDEO_20230305_111158706_annotation/fish_right_bottom',
+        '/VIDEO_20230305_111158706_annotation/fish_right_middle',
+        '/VIDEO_20230305_111158706_annotation/fish_right_top'
+        ]
+    filename2load = 'tracks_20230310-100823.pkl'  # A Model for train video with clean container, trained on 40 images over 9000 epochs
+else:
+    # ---- For original video, e.g., VIDEO_20230223_133606599 ------------------------
+    annotation_paths = [                                           # List of directories with annotation files
+        '/VIDEO_20230223_133606599_annotation/fish_bottom_right',
+        '/VIDEO_20230223_133606599_annotation/fish_first_from_right',
+        '/VIDEO_20230223_133606599_annotation/fish_first_left',
+        '/VIDEO_20230223_133606599_annotation/fish_second_from_left',
+        '/VIDEO_20230223_133606599_annotation/fish_second_from_right',    # 'Original' annotation
+        '/VIDEO_20230223_133606599_annotation/fish_third_from_right'
+        ]
+
+    #filename2load = 'tracks_20230228-173213.pkl'  # max_iou_dist = 0.5, max_age = 12, n_init=4, max_cosine_distance = 0.4 --> 147/816
+    #filename2load = 'tracks_20230228-181308.pkl'  # max_iou_dist = 0.2, max_age = 12, n_init=4, max_cosine_distance = 0.4 --> very few trackers
+    #filename2load = 'tracks_20230228-181822.pkl'  # max_iou_dist = 0.8, max_age = 12, n_init=4, max_cosine_distance = 0.4 --> 183/816
+    #filename2load = 'tracks_20230228-183435.pkl'  # max_iou_dist = 0.8, max_age = 12, n_init=4, max_cosine_distance = 0.8 --> 184/816
+    #filename2load = 'tracks_20230301-122144.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.4, max_age = 12, max_iou_dist = 0.5, n_init=4, nn_budget=None <-- 241 / 816
+    #filename2load = 'tracks_20230301-170515.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.4, max_age = 12, max_iou_dist = 0.5, n_init=3, nn_budget=None <--  282 / 816
+    #filename2load = 'tracks_20230301-171343.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.5, n_init=3, nn_budget=None <-- 293 / 816
+    #filename2load = 'tracks_20230301-172726.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.5, n_init=3, nn_budget=1 <-- 293 / 816
+    #filename2load = 'tracks_20230301-173333.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.8, n_init=3, nn_budget=None <-- 307 / 816
+    #filename2load = 'tracks_20230301-174037.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.8, n_init=6, nn_budget=None <-- 186 / 816
+    #filename2load = 'tracks_20230302-113337.pkl'  # ROI, 9000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.8, n_init=3, nn_budget=None <--  483 / 816 (59%!)
+    #filename2load = 'tracks_20230302-114112.pkl'  # ROI, 9000 epochs, max_cosine_distance = 0.9, max_age = 100, max_iou_dist = 0.8, n_init=3, nn_budget=None <-- 576 / 816 looks like too-many irrelevant tracks
+    #filename2load = 'tracks_20230302-115356.pkl'  # ROI, 9000 epochs, max_cosine_distance = 0.9, max_age = 24, max_iou_dist = 0.8, n_init=3, nn_budget=None <--  514 / 816 (63%!)
+    filename2load = 'tracks_20230302-120735.pkl'  # ROI, 9000 epochs, max_cosine_distance = 0.9, max_age = 24, max_iou_dist = 0.8, n_init=3, nn_budget=None, verify_detections <--  526 / 816 (64%!)
+    #filename2load = 'tracks_20230302-122106.pkl'  # ROI, 15000 epochs, max_cosine_distance = 0.9, max_age = 24, max_iou_dist = 0.8, n_init=3, nn_budget=None, verify_detections <-- 515 / 816 (63%!)
 
 
-#filename2load = 'tracks_20230228-173213.pkl'  # max_iou_dist = 0.5, max_age = 12, n_init=4, max_cosine_distance = 0.4 --> 147/816
-#filename2load = 'tracks_20230228-181308.pkl'  # max_iou_dist = 0.2, max_age = 12, n_init=4, max_cosine_distance = 0.4 --> very few trackers
-#filename2load = 'tracks_20230228-181822.pkl'  # max_iou_dist = 0.8, max_age = 12, n_init=4, max_cosine_distance = 0.4 --> 183/816
-#filename2load = 'tracks_20230228-183435.pkl'  # max_iou_dist = 0.8, max_age = 12, n_init=4, max_cosine_distance = 0.8 --> 184/816
-#filename2load = 'tracks_20230301-122144.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.4, max_age = 12, max_iou_dist = 0.5, n_init=4, nn_budget=None <-- 241 / 816
-#filename2load = 'tracks_20230301-170515.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.4, max_age = 12, max_iou_dist = 0.5, n_init=3, nn_budget=None <--  282 / 816
-#filename2load = 'tracks_20230301-171343.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.5, n_init=3, nn_budget=None <-- 293 / 816
-#filename2load = 'tracks_20230301-172726.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.5, n_init=3, nn_budget=1 <-- 293 / 816
-#filename2load = 'tracks_20230301-173333.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.8, n_init=3, nn_budget=None <-- 307 / 816
-#filename2load = 'tracks_20230301-174037.pkl'  # ROI, 10000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.8, n_init=6, nn_budget=None <-- 186 / 816
-#filename2load = 'tracks_20230302-113337.pkl'  # ROI, 9000 epochs, max_cosine_distance = 0.9, max_age = 12, max_iou_dist = 0.8, n_init=3, nn_budget=None <--  483 / 816 (59%!)
-#filename2load = 'tracks_20230302-114112.pkl'  # ROI, 9000 epochs, max_cosine_distance = 0.9, max_age = 100, max_iou_dist = 0.8, n_init=3, nn_budget=None <-- 576 / 816 looks like too-many irrelevant tracks
-#filename2load = 'tracks_20230302-115356.pkl'  # ROI, 9000 epochs, max_cosine_distance = 0.9, max_age = 24, max_iou_dist = 0.8, n_init=3, nn_budget=None <--  514 / 816 (63%!)
-filename2load = 'tracks_20230302-120735.pkl'  # ROI, 9000 epochs, max_cosine_distance = 0.9, max_age = 24, max_iou_dist = 0.8, n_init=3, nn_budget=None, verify_detections <--  526 / 816 (64%!)
-#filename2load = 'tracks_20230302-122106.pkl'  # ROI, 15000 epochs, max_cosine_distance = 0.9, max_age = 24, max_iou_dist = 0.8, n_init=3, nn_budget=None, verify_detections <-- 515 / 816 (63%!)
 # ------------------------------------------
 
 
@@ -99,7 +119,6 @@ if __name__ == '__main__':
 
     # Tracking data
     with open('performance_evaluation/' + filename2load, 'rb') as f:
-        #history_dict, nn_budget, max_cosine_distance, max_age, max_iou_dist, frame_height, frame_width = pickle.load(f)
         history_dict, max_cosine_distance, nn_budget, max_age, max_iou_dist, n_init, roi, height, width, model_path = pickle.load(f)
     print('\nFile:', filename2load, ' ---------------')
     print('model_path =', model_path)
