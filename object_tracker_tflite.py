@@ -155,7 +155,8 @@ def main():
     #model_path = 'data/model4_ROI_Mar2_2023.tflite'  # Model for train video with ROI, trained on 20 images over 3000 epochs
     #model_path = 'data/model3_ROI_Mar1_2023.tflite'  # Model for new camera with ROI, trained on 40 images over 10000 epochs
 
-    video_path = './data/video/VIDEO_20230304_100716744.mp4'  # Path of input video
+    #video_path = './data/video/VIDEO_20230304_100716744.mp4'  # Path of input video
+    video_path = './data/video/VIDEO_20230305_111158706.mp4'  # Path of input video: clean pool with annotation
     CUT_ROI_FLAG = True  # Cut a rectangle around ROI
 
     SHOW_VIDEO_FLAG = True  # True/False to show/don't show video output on screen
